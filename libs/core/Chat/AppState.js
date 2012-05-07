@@ -1,5 +1,12 @@
 var privats = {
-    'participantsList' : {}
+    'participantsList' : {},
+    'connectionList' : {}
+};
+
+exports.init = function () {
+    exports.Hooks = exports.Services.ModuleProvider.getModule( 'Core/Chat/AppHooks' );
+    exports.Hooks.setApplication( exports );
+
 };
 
 exports.getParticipantNickList = function () {
@@ -29,7 +36,7 @@ exports.removeParticipant = function ( UserId ) {
 exports.getParticipantByUserId = function ( UserId ) {
     for( var i in privats.participantsList ) {
         if( privats.participantsList[i].User.getId().toString() == UserId.toString() ) {
-            console.log( privats.participantsList[i].User.getId(), UserId );
+            //console.log( privats.participantsList[i].User.getId(), UserId );
             return privats.participantsList[i].User;
         }
     }
@@ -37,4 +44,35 @@ exports.getParticipantByUserId = function ( UserId ) {
 };
 
 
+exports.appendNewConnection = function ( ConnectionState ) {
+    /*console.log( '--------- Before ---------' );
+    for( var i = 0; i < privats.connectionList.length; i++ ) {
+        var participant = privats.connectionList[i].getParticipant();
+        console.log( i, participant ? participant.getNick() : participant, privats.connectionList[i].getConnectionNumber() );
+    }*/
+    var number = privats.generateConnectionNumber();
+    privats.connectionList[number] = ConnectionState;
+    ConnectionState.setConnectionNumber( number );
+    /*console.log( '--------- After ---------' );
+    for( var i = 0; i < privats.connectionList.length; i++ ) {
+        var participant = privats.connectionList[i].getParticipant();
+        console.log( i, participant ? participant.getNick() : participant, privats.connectionList[i].getConnectionNumber() );
+    }
+    console.log( '-------------------------' );*/
+};
 
+exports.removeConnection = function ( ConnectionState ) {
+    delete privats.connectionList[ConnectionState.getConnectionNumber()];
+};
+
+exports.getConnections = function () {
+    return privats.connectionList;
+};
+
+privats.generateConnectionNumber = function () {
+    do {
+        var number = Math.random();
+    } while( typeof privats.connectionList[ number ] !== 'undefined' );
+
+    return number;
+};

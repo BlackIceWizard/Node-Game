@@ -1,6 +1,18 @@
 function ChatConstuctor( ) {
     this.participantsList = [];
 
+    this.init = function (){
+        $('#chatSendButton').click( function () {
+            var text = $('#chatInputField').val();
+            $('#chatInputField').val( '' );
+            initiateDialog( 'SendMessage', { 'text' : text } );
+        })
+    };
+
+    this.appendMessage = function ( message ) {
+        $('#chatMessagesContainer').append('<li><b>'+message.from_nick+':</b> '+message.text+'</li>')
+    };
+
     this.addChatUsers = function( UserNicks ) {
         this.participantsList = UserNicks;
         this.drawParticipantsList();
@@ -21,6 +33,11 @@ function ChatConstuctor( ) {
         this.participantsList.splice ( indexForRemove, 1 );
         this.drawParticipantsList();
     };
+
+    this.appendUserToParticipants = function( UserNick ) {
+        this.participantsList.push( UserNick );
+        this.drawParticipantsList()
+    }
 }
 
 Chat = new ChatConstuctor();

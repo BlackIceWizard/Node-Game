@@ -84,7 +84,9 @@ var dialogs = {
             output =  'GetChatParticipantList';
         } else if( typeof message == 'object' && typeof message.ChatParticipants != "undefined" ) {
             console.log( 'Take Chat Participant List' );
+            Chat.init();
             Chat.addChatUsers( message.ChatParticipants );
+
         }
         return output;
     },
@@ -95,6 +97,26 @@ var dialogs = {
         Chat.removeUserFromParticipants( message.UserNick );
         console.log( 'User '+message.UserNick+' has left' );
 
+        return output;
+    },
+
+    UserHasJoined : function ( message ) {
+        var output = null;
+
+        Chat.appendUserToParticipants( message.UserNick );
+        console.log( 'User '+message.UserNick+' has joined' );
+
+        return output;
+    },
+
+    SendMessage : function ( message ) {
+        var output = message;
+        return output;
+    },
+
+    ReceiveMessage : function ( message ) {
+        var output = null;
+        Chat.appendMessage( message );
         return output;
     }
 };

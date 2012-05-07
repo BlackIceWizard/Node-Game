@@ -5,6 +5,7 @@ privats.sessions = {};
 privats.timeoutIds = {};
 
 exports.newSession = function ( sessionId, isRegistered ) {
+
     if( typeof isRegistered == "undefined" )
         isRegistered = false;
 
@@ -17,6 +18,8 @@ exports.newSession = function ( sessionId, isRegistered ) {
         privats.sessions[sessionId] = new privats.Session( SessionLifeTime );
 
     privats.timeoutIds[sessionId] = setTimeout( exports.destroySession, SessionLifeTime, sessionId );
+
+    return privats.sessions[sessionId];
 };
 
 exports.report = function () {

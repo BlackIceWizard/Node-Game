@@ -21,14 +21,16 @@ exports.manageSessionState = function ( request, response ) {
 
     var cookieSessionObject = null;
 
+    //Look for already assigned session cookies
     //try {
         if( typeof request.headers.cookie != 'undefined' ) {
 
             var cookies = privats.parseCookieHeader( request.headers.cookie );
 
             var session_creation_time = 0;
-            var oldestCookieSessionId = null;
- 
+            var newestCookieSessionId = null;
+
+            //Parse session cookies and look for newest among theirs
             for( var i = 0; i < cookies.length; i++ ) {
                 if( cookies[i].name == 'sessionid' ) {
                     var cookieSessionJSON = privats.decode( cookies[i].value );
@@ -36,7 +38,7 @@ exports.manageSessionState = function ( request, response ) {
                     if( cookieSessionJSON ) {
                         cookieSessionObject = JSON.parse( cookieSessionJSON );
                         if( privats.isValidSessionCookie( cookieSessionObject ) && cookieSessionObject.t > session_creation_time ) {
-                            oldestCookieSessionId = cookieSessionObject;
+                            newestCookieSessionId = cookieSessionObject;
                             session_creation_time = cookieSessionObject.t;
                         }
                     }
@@ -44,10 +46,13 @@ exports.manageSessionState = function ( request, response ) {
             }
         }
 
-        if( oldestCookieSessionId ) {
-            isRegistered = oldestCookieSessionId.r;
-            sessionId = oldestCookieSessionId.id;
+        
+        if( newestCookieSessionId ) {
+            isRegistered = newestCookieSessionId.r;
+            sessionId = newestCookieSessionId.id;
 
+            //If decoded sessionId (UserId) isset in Session base then  they will use as current and will prolong
+            //Else if cookies contains UserId then we will create new session with this UserId
             if( SessionBase.isset( sessionId ) ) {
 
                 Session = SessionBase.getSession( sessionId );
@@ -65,6 +70,7 @@ exports.manageSessionState = function ( request, response ) {
         Session = null;
     }*/
 
+    //If session cookies is not found then create session for not auth users
     if( !Session ){
         var now = new Date();
         sessionId = now.getTime();
@@ -85,13 +91,15 @@ exports.manageSessionState = function ( request, response ) {
 };
 
 exports.sendSessionCookie = function ( sessionId, response ) {
-    var SessionCookieLifeTime = exports.Services.Config.get( "Site", "SessionCookieLifeTime" );
+    var SessionBase = exports.Services.ModuleProvider.getModule( "Core/Session/Base" );
+    var session = SessionBase.getSession( sessionId );
+    //var SessionCookieLifeTime = exports.Services.Config.get( "Site", "SessionCookieLifeTime" );
     var now = new Date();
-    var expires = new Date( now.getTime() + SessionCookieLifeTime );
-    var encodedSessionId = privats.encodeSessionId( now.getTime(), sessionId, 0 );
+    //var expires = new Date( now.getTime() + SessionCookieLifeTime );
+    var encodedSessionId = privats.encodeSessionId( now.getTime(), sessionId, session.getUserId() !== null ? 1 : 0 );
 
-    response.setHeader( "Set-Cookie", 'sessionid=' + encodedSessionId + '; expires=' + expires.toGMTString() + '; path=/;' );
-}
+    response.setHeader( "Set-Cookie", 'sessionid=' + encodedSessionId + '; expires=' + session.getExpireDate().toGMTString() + '; path=/;' );
+};
 
 privats.encodeSessionId =function ( t, id, r ) {
     var cookieSessionObject = { 't' : t, 'id' : id, 'r' : r };
@@ -100,7 +108,7 @@ privats.encodeSessionId =function ( t, id, r ) {
 
 privats.isValidSessionCookie = function ( cookieObject ) {
     return typeof cookieObject.t != 'undefined' && typeof cookieObject.id != 'undefined' &&  typeof cookieObject.r != 'undefined';
-}
+};
 
 privats.parseCookieHeader = function ( cookiesString ) {
     var StringHelper = exports.Services.ModuleProvider.getModule( 'Helpers/String' );

@@ -41,10 +41,9 @@ privats.renderWidget = function ( renderQueue, widgets, ViewParams, RequestState
 
     var MP = exports.Services.ModuleProvider;
     
-    if( typeof widgetParams.display != 'undefined' && !widgetParams.display ) {
+    if( typeof widgetParams.display == 'undefined' || !widgetParams.display ) {
         ViewParams.appendWidgetContent( widgetName, '' );
     } else {
-
         var widget = MP.getModule( 'Site/Widgets/'+widgetName );
         var widgetLayout = MP.getModule( 'Site/HTML/Widgets/'+widgetName );
 

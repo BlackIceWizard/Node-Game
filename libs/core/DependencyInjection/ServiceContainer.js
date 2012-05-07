@@ -3,7 +3,6 @@ var privats = {};
 privats.ModuleProvider = null;
 privats.Services = {};
 privats.ServicesConfig = [];
-privats.eventEmitter = null;
 privats.callback = null;
 privats.serviceListEndIsReached = false;
 privats.servicesInProgress = 0;
@@ -14,12 +13,6 @@ exports.construct = function ( ModuleProvider, ConfigModule ) {
 
     privats.ModuleProvider = ModuleProvider;
     privats.loadServicesConfig(  ConfigModule );
-
-    privats.eventEmitter = new events.EventEmitter();
-    privats.eventEmitter.addListener( 'ServiceInit', privats.serviceInitListener );
-    privats.eventEmitter.addListener( 'AfterServiceInit', privats.afterServiceInitListener );
-    privats.eventEmitter.addListener( 'AfterServiceConstruct', privats.afterServiceConstructListener );
-    privats.eventEmitter.addListener( 'ServiceLevelInit', privats.serviceLevelInitListener );
 
     return exports;
 };
@@ -33,11 +26,10 @@ exports.initServices = function ( callback ) {
     privats.callback = callback;
     privats.registerModuleProvider();
 
-    privats.eventEmitter.emit( 'ServiceLevelInit', privats.ServicesConfig );
-
+    setTimeout( privats.serviceLevelInit, 0, privats.ServicesConfig );
 };
 
-privats.serviceLevelInitListener = function ( serviceLevel ) {
+privats.serviceLevelInit = function ( serviceLevel ) {
     var NextLevel = null;
     for( var serviceName in serviceLevel ) {
 
@@ -46,7 +38,7 @@ privats.serviceLevelInitListener = function ( serviceLevel ) {
 
         if( serviceName == 'NextLevel' ) {
             NextLevel = serviceLevel[serviceName];
-            privats.eventEmitter.emit( 'ServiceLevelInit', NextLevel );
+            setTimeout( privats.serviceLevelInit, 0, NextLevel );
 
             continue;
         }
@@ -57,40 +49,34 @@ privats.serviceLevelInitListener = function ( serviceLevel ) {
 
         privats.servicesInProgress++;
 
-        privats.eventEmitter.emit( 'ServiceInit', serviceDefinition );
-
+        setTimeout( privats.serviceInit, 0, serviceDefinition );
     }
 
     if( NextLevel == null )
         privats.serviceListEndIsReached = true;
 };
 
-privats.serviceInitListener = function ( serviceDefinition ) {
+privats.serviceInit = function ( serviceDefinition ) {
     console.log( 'Init log: Service "'+serviceDefinition.name+'" initializing' );
     var Module = privats.ModuleProvider.getModule( serviceDefinition.module );
 
-    if( typeof Module.construct != 'undefined' ) {
+    if( typeof Module.construct == 'function' ) {
         Module.construct( function ( Module ) {
-            privats.eventEmitter.emit( 'AfterServiceConstruct', serviceDefinition, Module );
+            setTimeout( privats.afterServiceInit, 0, serviceDefinition.name, Module );
         });
     } else
-        privats.eventEmitter.emit( 'AfterServiceInit', serviceDefinition.name, Module );
+        setTimeout( privats.afterServiceInit, 0, serviceDefinition.name, Module );
 };
 
-privats.afterServiceConstructListener = function ( serviceDefinition, Module ) {
-    privats.eventEmitter.emit( 'AfterServiceInit', serviceDefinition.name, Module );
-}
-
-privats.afterServiceInitListener= function ( ServiceName, Service ) {
+privats.afterServiceInit = function ( ServiceName, Service ) {
     privats.Services[ServiceName] = Service;
 
     console.log( 'Init log: Service "'+ServiceName+'" initialized' );
 
     privats.servicesInProgress--;
 
-    if( privats.serviceListEndIsReached && privats.servicesInProgress == 0 ) {
+    if( privats.serviceListEndIsReached && privats.servicesInProgress == 0 )
         privats.callback( privats.Services );
-    }
 };
 
 privats.registerModuleProvider = function() {

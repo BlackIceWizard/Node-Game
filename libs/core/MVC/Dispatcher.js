@@ -1,17 +1,7 @@
 var privats = {};
 
-privats.eventEmitter = null;
-
 exports.construct = function () {
     privats.router = exports.Services.ModuleProvider.getModule( 'Core/MVC/Router' );
-
-    var events = require("events");
-
-    privats.eventEmitter = new events.EventEmitter();
-    privats.eventEmitter.addListener( 'grabbingRequestData', privats.grabbingRequestDataListener );
-    privats.eventEmitter.addListener( 'executingController', privats.executingControllerListener );
-    privats.eventEmitter.addListener( 'executingView', privats.executingViewListener );
-    privats.eventEmitter.addListener( 'renderingTemplate', privats.renderingTemplateListener );
 };
 
 exports.dispatch = function ( request, response, sessionid ) {
@@ -31,25 +21,25 @@ exports.dispatch = function ( request, response, sessionid ) {
 
     var namespace = { 'route' : route, 'Conrtoller' : Conrtoller, 'Model' : Model, 'View' : View, 'RequestState' : RequestState };
 
-    privats.eventEmitter.emit( "grabbingRequestData", namespace );
+    privats.grabbingRequestData ( namespace );
 };
 
-privats.grabbingRequestDataListener = function ( namespace ) {
+privats.grabbingRequestData = function ( namespace ) {
 
     var request = namespace.RequestState.getRequest();
     var RequestProcessor = exports.Services.RequestProcessor.getInstance( request.headers['content-type'] );
 
     var requestStr = "";
-    
+
     request.addListener("data", function (chunk) { requestStr += chunk } );
     request.addListener("end", function () {
         RequestProcessor.parseRequestStr( requestStr );
         namespace.RequestState.setRequestData( RequestProcessor );
-        privats.eventEmitter.emit( "executingController", namespace );
+        setTimeout( privats.executingController, 0, namespace );
     } );
 };
 
-privats.executingControllerListener = function( namespace ) {
+privats.executingController = function( namespace ) {
     var action = privats.ucfirst( namespace.route.ActionParams.action );
 
     if( typeof namespace.Conrtoller[action] == 'undefined'  )
@@ -66,12 +56,12 @@ privats.executingControllerListener = function( namespace ) {
             response.writeHead(301, {'Location': redirect } );
             response.end();
         } else {
-            privats.eventEmitter.emit( "executingView", namespace );
+            setTimeout( privats.executingView, 0, namespace );
         }
     });
 };
 
-privats.executingViewListener = function ( namespace ) {
+privats.executingView = function ( namespace ) {
 
     var layout = namespace.route.ViewParams.getLayout();
 
@@ -80,10 +70,10 @@ privats.executingViewListener = function ( namespace ) {
 
     namespace.View[layout]( namespace.route.ViewParams, namespace.Model );
 
-    privats.eventEmitter.emit( "renderingTemplate", namespace );
+    setTimeout( privats.renderingTemplate, 0, namespace );
 };
 
-privats.renderingTemplateListener = function ( namespace ) {
+privats.renderingTemplate = function ( namespace ) {
     var response = namespace.RequestState.getResponse();
 
     var Template = exports.Services.ModuleProvider.getModule( 'Site/Templates/'+namespace.route.ViewParams.getTemplate() );

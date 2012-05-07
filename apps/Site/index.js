@@ -5,7 +5,7 @@
 var http   = require('http');
 var path   = require('path');
 var fs     = require('fs');
-var events = require("events");
+
 
 var rootDirectory = path.normalize( __dirname + '/../..' );
 
@@ -95,8 +95,6 @@ function serverUp( Services ) {
 
 
 
-
-
     /*
      * Init Socket Server
      */
@@ -104,12 +102,14 @@ function serverUp( Services ) {
     var SocketDispatcher = Services.ModuleProvider.getModule( 'Core/Socket/Dispatcher' );
     var net  = require("net");
     var ChatAppState = Services.ModuleProvider.getModule( 'Core/Chat/AppState' );
-    var ChatEventEmitter = new events.EventEmitter();
-    //privats.eventEmitter.addListener( 'ServiceInit', privats.serviceInitListener );
+    ChatAppState.init();
 
     net.createServer(function (stream) {
-
+        //console.log( "CreateTCPServer------------------------------------" );
         var ConnectionState = Services.ModuleProvider.getModule( 'Core/Chat/ConnectionState' ).getInstance();
+
+        ChatAppState.appendNewConnection( ConnectionState );
+        ConnectionState.setConnectionStream( stream );
 
         stream.setEncoding("utf8");
 
@@ -117,11 +117,11 @@ function serverUp( Services ) {
 
         stream.on("connect", function () {
             stream.write("hello\0");
-            console.log( 'TCP: Connecting' );
+            //console.log( 'TCP: Connecting' );
         });
 
         stream.on( 'data', function ( data ) {
-            console.log( 'TCP input: '+data );
+            //console.log( 'TCP input: '+data );
             if( ConnectionState.getSession() == null ) {
                 if( data == '<policy-file-request/>\0' )
                     data = '{ "dialog":"StartUp", "message":"<policy-file-request/>" }'+"\0";
@@ -132,25 +132,19 @@ function serverUp( Services ) {
 
         stream.on("end", function () {
             var Session = ConnectionState.getSession();
-            console.log( 'TCP: End' );
+            //console.log( 'TCP: End' );
 
             stream.end();
 
-            if( Session === null || Session.getUserId() === null )
-                return;
+            if( Session !== null && Session.getUserId() !== null ) {
+                //console.log( 'TCP: Delete user "'+Session.getUserId()+'"' );
 
-            console.log( 'TCP: Delete user "'+Session.getUserId()+'"' );
+                var User = ChatAppState.getParticipantByUserId( Session.getUserId() );
+                ChatAppState.removeParticipant( Session.getUserId() );
+                ChatAppState.Hooks.onLostUserConnection( User );
+            }
 
-            var User = ChatAppState.getParticipantByUserId( Session.getUserId() );
-            ChatAppState.removeParticipant( Session.getUserId() );
-            ChatEventEmitter.emit( 'LostUserConnection', User );
-
-
-        });
-
-        ChatEventEmitter.addListener( 'LostUserConnection', function( User ) {
-            if( stream.writable )
-                SocketDispatcher.initiateDialog( 'UserHasLeft', { 'User' : User }, ConnectionState, ChatAppState, stream );
+            ChatAppState.removeConnection( ConnectionState );
         });
     }).listen(843, "127.0.0.2");
 

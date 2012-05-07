@@ -34,7 +34,7 @@ privats.getRoute = function( path ) {
     }
 
     return route;
-}
+};
 
 privats.loadModule = function( path ) {
    
@@ -62,7 +62,7 @@ privats.loadModule = function( path ) {
         privats.assignServicesIntoModule( module );
 
     return module;
-}
+};
 
 exports.discoverPath = function( path, absolutePath ) {
     if( typeof absolutePath == 'undefined' )
@@ -93,10 +93,10 @@ exports.discoverPath = function( path, absolutePath ) {
     }
 
     return result;
-}
+};
 
 
 
 privats.assignServicesIntoModule = function ( module ) {
     module.Services = privats.ServiceContainer.getServices();
-}
+};
