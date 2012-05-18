@@ -1,3 +1,3 @@
-exports.Index = function ( ViewParams ) {
-
+exports.Index = function ( ViewParams, RequestState, Model ) {
+    ViewParams.set( 'auth', !!RequestState.getSession().getUserId() );
 };

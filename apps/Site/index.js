@@ -98,12 +98,11 @@ function serverUp( Services ) {
     /*
      * Init Socket Server
      */
-
     var SocketDispatcher = Services.ModuleProvider.getModule( 'Core/Socket/Dispatcher' );
-    var net  = require("net");
     var ChatAppState = Services.ModuleProvider.getModule( 'Core/Chat/AppState' );
     ChatAppState.init();
 
+    var net  = require("net");
     net.createServer(function (stream) {
         //console.log( "CreateTCPServer------------------------------------" );
         var ConnectionState = Services.ModuleProvider.getModule( 'Core/Chat/ConnectionState' ).getInstance();
@@ -113,8 +112,10 @@ function serverUp( Services ) {
 
         stream.setEncoding("utf8");
 
+        //The fist thing what we need to do on open stream - write Crossdomain XML. It because we work with Flash player
         stream.write( Services.ModuleProvider.getModule( 'Helpers/Common' ).crossdomainXML() +"\0");
 
+        //Always on connect we write "Hello" message
         stream.on("connect", function () {
             stream.write("hello\0");
             //console.log( 'TCP: Connecting' );

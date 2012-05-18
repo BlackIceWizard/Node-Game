@@ -1,4 +1,4 @@
-exports.Index = function ( ViewParams ) {
+exports.Index = function ( ViewParams, RequestState, Model ) {
     ViewParams.appendScriptLink( 'assets/js/signin.js' );
 };
 

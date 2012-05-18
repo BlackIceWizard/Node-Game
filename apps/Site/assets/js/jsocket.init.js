@@ -61,6 +61,11 @@ function sendData( dialog, message ) {
 }
 
 var dialogs = {
+
+    /*
+        Chat dialogs
+     */
+
     StartUp : function ( message ) {
         var output = null;
         if( message == "WhatYourSessionID" ) {
@@ -119,4 +124,8 @@ var dialogs = {
         Chat.appendMessage( message );
         return output;
     }
+
+    /*
+        Arena dialogs
+     */
 };

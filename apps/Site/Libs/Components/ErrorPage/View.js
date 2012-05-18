@@ -1,3 +1,3 @@
-exports.PageNotFound404 = function ( ViewParams ) {
+exports.PageNotFound404 = function ( ViewParams, RequestState, Model ) {
 
 };

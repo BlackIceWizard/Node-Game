@@ -1,4 +1,12 @@
 exports.requests = [
+    /*  ----- Game Section -----  */
+    {
+        URL : [ '^/arena$' ],
+        Component : 'Arena',
+        ActionParams : { action : null },
+        ViewParams : { template : 'Default', layoutFolder : 'Arena',    layout : 'Index' }
+    },
+
     /*  ----- Login Section -----  */
     {
         URL : [ '^/login/{action}$',
