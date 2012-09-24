@@ -84,9 +84,9 @@ function serverUp( Services ) {
 
         HTTPDispatcher.dispatch( request, response, sessionId );
         
-    }).listen(8080, '127.0.0.2' );
+    }).listen(8008, '127.0.0.2' );
 
-    console.log('HTTP Server running at http://127.0.0.2:8080/');
+    console.log('HTTP Server running at http://127.0.0.2:8008/');
 
 
 
@@ -99,16 +99,38 @@ function serverUp( Services ) {
      * Init Socket Server
      */
     var SocketDispatcher = Services.ModuleProvider.getModule( 'Core/Socket/Dispatcher' );
-    var ChatAppState = Services.ModuleProvider.getModule( 'Core/Chat/AppState' );
-    ChatAppState.init();
+
+    var SocketFrame = Services.ModuleProvider.getModule( 'Core/Socket/Frame' );
+
+    var RegistryConnections = Services.ModuleProvider.getModule( 'Core/Socket/RegistryConnections' );
+    var Games = Services.ModuleProvider.getModule( 'Core/BomberMan/Games' );
+
+    SocketFrame.RegistryConnections = RegistryConnections;
+    SocketFrame.Games = Games;
+    SocketFrame.Areas = Services.ModuleProvider.getModule( 'Core/Config').get( 'Socket', 'Areas' );
+
+    SocketFrame.registerHooks( 'Chat', Services.ModuleProvider.getModule( 'Core/Chat/Hooks' ) );
+    SocketFrame.registerHooks( 'BomberMan', Services.ModuleProvider.getModule( 'Core/BomberMan/Hooks' ) );
+
+
+    var Game = Services.ModuleProvider.getModule( 'Core/BomberMan/Game').getInstance();
+    Game.construct();
+    Games.appendNewGame( Game );
+
 
     var net  = require("net");
-    net.createServer(function (stream) {
-        //console.log( "CreateTCPServer------------------------------------" );
-        var ConnectionState = Services.ModuleProvider.getModule( 'Core/Chat/ConnectionState' ).getInstance();
 
-        ChatAppState.appendNewConnection( ConnectionState );
+    function netServerInit( stream ) {
+
+        //console.log( "CreateTCPServer------------------------------------" );
+        var ConnectionState = Services.ModuleProvider.getModule( 'Core/Socket/ConnectionState' ).getInstance();
+
+        RegistryConnections.appendNewConnection( ConnectionState );
         ConnectionState.setConnectionStream( stream );
+
+        var MessageHistory = Services.ModuleProvider.getModule( 'Core/Socket/MessageHistory' ).getInstance();
+        ConnectionState.setMessageHistory( MessageHistory );
+
 
         stream.setEncoding("utf8");
 
@@ -117,17 +139,32 @@ function serverUp( Services ) {
 
         //Always on connect we write "Hello" message
         stream.on("connect", function () {
-            stream.write("hello\0");
+            //stream.write("hello\0");
             //console.log( 'TCP: Connecting' );
         });
 
         stream.on( 'data', function ( data ) {
-            //console.log( 'TCP input: '+data );
+            console.log( 'TCP input: '+data );
             if( ConnectionState.getSession() == null ) {
-                if( data == '<policy-file-request/>\0' )
-                    data = '{ "dialog":"StartUp", "message":"<policy-file-request/>" }'+"\0";
+                if( data == '<policy-file-request/>\0' ) {
+                    //data = '{ "area":'+SocketFrame.Areas.Main+', "dialog":"StartUp", "message":"<policy-file-request/>" }'+"\0";
+                    return;
+                }
             }
-            SocketDispatcher.dispatch( data, ConnectionState, ChatAppState, stream );
+
+            if( data[data.length-1] == '\0' )
+                data = data.substr( 0, data.length -1 );
+
+
+            var data_parts = data.split( '\0' );
+
+            for( var i = 0; i < data_parts.length; i++ ) {
+                var data_parts2 = data_parts[i].split( '\n' );
+                for( var j = 0; j < data_parts2.length; j++ ) {
+                    if( data_parts2[j].length )
+                        SocketDispatcher.dispatch( data_parts2[j], ConnectionState, SocketFrame, stream );
+                }
+            }
 
         });
 
@@ -140,16 +177,24 @@ function serverUp( Services ) {
             if( Session !== null && Session.getUserId() !== null ) {
                 //console.log( 'TCP: Delete user "'+Session.getUserId()+'"' );
 
-                var User = ChatAppState.getParticipantByUserId( Session.getUserId() );
-                ChatAppState.removeParticipant( Session.getUserId() );
-                ChatAppState.Hooks.onLostUserConnection( User );
+                var User = RegistryConnections.getParticipantByUserId( Session.getUserId() );
+                RegistryConnections.removeParticipant( Session.getUserId() );
+
+                SocketFrame.getHooks( 'Chat' ).onLostUserConnection( User );
+                SocketFrame.getHooks( 'BomberMan' ).onLostUserConnection( ConnectionState );
             }
 
-            ChatAppState.removeConnection( ConnectionState );
+            RegistryConnections.removeConnection( ConnectionState );
         });
-    }).listen(843, "127.0.0.2");
+    }
+    var NetServer = net.createServer( netServerInit );
+    NetServer.listen(8430, "192.168.1.2");
+    console.log('TCP Server running at http://192.168.1.2:8430/');
+    var LocalNetServer = net.createServer( netServerInit );
+    LocalNetServer.listen(8430, "127.0.0.1");
+    console.log('TCP Server running at http://127.0.0.1:8430/');
 
-    console.log('TCP Server running at http://127.0.0.2:843/');
+
 
 
 }

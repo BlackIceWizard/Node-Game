@@ -1,9 +1,9 @@
 exports.requests = [
     /*  ----- Game Section -----  */
     {
-        URL : [ '^/arena$' ],
+        URL : [ '^/arena/{game}/{team}$' ],
         Component : 'Arena',
-        ActionParams : { action : null },
+        ActionParams : { action : 'AssignInGame', game : null, team : null },
         ViewParams : { template : 'Default', layoutFolder : 'Arena',    layout : 'Index' }
     },
 
@@ -37,7 +37,18 @@ exports.requests = [
         ViewParams : { template : 'JSON', layoutFolder : 'JSignin',   layout : 'Index' }
     },
 
-    /*  ----- MainPage Section -----  */
+
+
+
+    /*  ----- content Section -----  */
+    {
+        URL : '^/page/{page}$',
+        Component : 'ContentPage',
+        ActionParams : { action : 'ShowContentPage' },
+        ViewParams : { template : 'Default', layoutFolder : 'ContentPage', layout : '' }
+    },
+
+    /*  ----- Main Section -----  */
 
     {
         URL : '^/+$',

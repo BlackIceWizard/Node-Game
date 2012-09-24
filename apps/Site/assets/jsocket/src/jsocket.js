@@ -89,7 +89,7 @@ jSocket.prototype.setup = function(target, swflocation) {
   if(typeof(this.target) != 'undefined')
     throw 'Can only call setup on a jSocket Object once.';
   this.target = target;
-  
+
   // Add the object to the dom
   return swfobject.embedSWF(
     (swflocation ? swflocation : jSocket.swf)+'?'+this.id,

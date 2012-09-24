@@ -116,6 +116,7 @@ privats.parseCookieHeader = function ( cookiesString ) {
     var nameValuePairs = cookiesString.split( ";" );
 
     for( var i = 0; i < nameValuePairs.length; i++ ) {
+        if( nameValuePairs[i] == '' ) continue;
         var nameValuePair = nameValuePairs[i].split( "=" );
         cookies.push( { 'name' : StringHelper.trim( nameValuePair[0] ), 'value' : StringHelper.trim( nameValuePair[1] ) } );
     }

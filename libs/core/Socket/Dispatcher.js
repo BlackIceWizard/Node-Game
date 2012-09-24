@@ -1,11 +1,8 @@
 var privats = {};
 
-exports.dispatch = function( JSONData, ConnectionState, AppState, stream ) {
+exports.dispatch = function( JSONData, ConnectionState, SocketFrame, stream ) {
 
     var MP = exports.Services.ModuleProvider;
-
-    if( JSONData[JSONData.length-1] == '\0' )
-        JSONData = JSONData.substr( 0, JSONData.length -1 );
 
     var data = JSON.parse( JSONData );
 
@@ -15,42 +12,53 @@ exports.dispatch = function( JSONData, ConnectionState, AppState, stream ) {
     if( typeof data.message == "undefined" )
         throw new Error('SocketDispatcher: dialog "'+JSON.stringify( JSONData )+'" receive data without message');
 
+    if( typeof data.area == "undefined" )
+        throw new Error('SocketDispatcher: dialog "'+JSON.stringify( JSONData )+'" receive data without area');
+
+    var AreaName = SocketFrame.getAreaName( data.area );
+
+    if( AreaName === null )
+        throw new Error('SocketDispatcher: dialog "'+JSON.stringify( JSONData )+'" receive data with not registered area number');
+
     var message = data.message;
     var dialogName = data.dialog;
 
-    var output = MP.getModule( "Site/Socket/Dialogs/"+dialogName ).talk( message, ConnectionState, AppState, false, function ( output ) {
+    var output = MP.getModule( "Site/Socket/Dialogs/"+AreaName+"/"+dialogName ).talk( message, ConnectionState, SocketFrame, false, function ( output ) {
         //console.log( ConnectionState );
-        privats.sendData( stream, dialogName, output, ConnectionState )
+        privats.sendData( stream, data.area, dialogName, output, ConnectionState )
     });
 
 };
 
-exports.initiateDialog = function ( dialogName, message, ConnectionState, AppState ) {
+exports.initiateDialog = function ( area, dialogName, message, ConnectionState, SocketFrame ) {
     var MP = exports.Services.ModuleProvider;
     var stream = ConnectionState.getConnectionStream();
-    var output = MP.getModule( "Site/Socket/Dialogs/"+dialogName ).talk( message, ConnectionState, AppState, true, function ( output ) {
-        privats.sendData( stream, dialogName, output, ConnectionState )
+
+    var AreaName = SocketFrame.getAreaName( area );
+
+    var output = MP.getModule( "Site/Socket/Dialogs/"+AreaName+"/"+dialogName ).talk( message, ConnectionState, SocketFrame, true, function ( output ) {
+        privats.sendData( stream, area, dialogName, output, ConnectionState )
     });
 };
 
-privats.sendData = function ( stream, dialogName, output, ConnectionState ) {
+privats.sendData = function ( stream, area, dialogName, output, ConnectionState ) {
     if( output !== null ) {
 
-        var str_output = JSON.stringify( { 'dialog' : dialogName, 'message' : output } ) + "\0";
+        var messageNumber = ConnectionState.getMessageHistory().getNextMessageNumber();
+        var str_output = JSON.stringify( { 'area' : area, 'dialog' : dialogName, 'n':messageNumber, 'message' : output })+"\n";
+        ConnectionState.getMessageHistory().pushMessage( str_output );
         
         if( ConnectionState.isMessageQueueFree() ) {
             ConnectionState.takePlaceInMessageQueue();
 
-            //if( stream.writable ) {
-                //console.log( 'TCP output: '+str_output );
-
+            if( stream.writable ) {
+                console.log( 'TCP output: '+str_output );
                 stream.write( str_output, 'UTF8', function() {
-                    //stream.pipe(stream);
-                    privats.afterSendData( stream, ConnectionState )
+                    setTimeout( function() { privats.afterSendData( stream, ConnectionState ) }, 20 );
                 });
-            /*} else {
+            } else {
                 console.log( 'TCP error: stream not writable' );
-            }*/
+            }
         } else {
             ConnectionState.pushInMessageQueue( str_output );
         }
@@ -64,11 +72,9 @@ privats.afterSendData = function ( stream, ConnectionState ) {
         ConnectionState.setFreeMessageQueue();
     } else {
         if( stream.writable ) {
-            //console.log( 'TCP output: '+str_output );
-            //console.log( '---------------------------------------------------' );
+            console.log( 'TCP output: '+str_output );
             stream.write( str_output, 'UTF8', function() {
-                stream.pipe(stream);
-                privats.afterSendData( stream, ConnectionState )
+                setTimeout( function() { privats.afterSendData( stream, ConnectionState ) }, 20 );
             })
         } else {
             console.log( 'TCP error: stream not writable' );

@@ -10,6 +10,7 @@ privats.Instance = function () {
 
     var page = {
         scriptLinks : [],
+        scriptDeclarations : [],
         CSSLinks : [],
         layoutContent : '',
         widgets : {}
@@ -43,6 +44,9 @@ privats.Instance = function () {
 
     this.appendCSSLink = function ( link ) { page.CSSLinks.push( link ); };
     this.getCSSLinks = function () { return page.CSSLinks; };
+
+    this.appendScriptDeclaration = function ( script ) { page.scriptDeclarations.push( script ); };
+    this.getScriptDeclarations = function () { return page.scriptDeclarations; };
 
     this.setLayoutContent = function ( content ) { page.layoutContent = content; };
     this.getLayoutContent = function () { return page.layoutContent; };

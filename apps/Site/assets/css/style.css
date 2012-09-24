@@ -2,3 +2,60 @@
     font-size:small;
     color:red;
 }
+
+/*
+    BomberMan Arena
+*/
+.sprite {
+    background-image: url( ../ima/sprites.png );
+    background-repeat: no-repeat;
+    position: absolute;
+}
+
+#arena {
+    position:relative;
+    background-color: #f5f5aa;
+    border:8px ridge #ff8c00;
+}
+
+.strong_wall_cell {
+    background-image: url( ../ima/sprites.png );
+    background-repeat: no-repeat;
+    width:16px;
+    height: 16px;
+    float:left;
+}
+
+.empty_cell {
+    width:16px;
+    height: 16px;
+    float:left;
+}
+
+/*
+    General
+*/
+
+
+ul.main_menu li{
+    padding-right: 15px;
+    float:left;
+    list-style: none;
+
+}
+
+ul.main_menu li a{
+    color:black;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+ul.main_menu li.current a{
+    color:#ff4500;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.clear {
+    clear: both;
+}

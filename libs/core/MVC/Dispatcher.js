@@ -61,6 +61,17 @@ privats.postExecutingController = function( namespace ) {
 
     var redirect = namespace.RequestState.getRedirect();
     if( redirect ) {
+
+        if( redirect.substr( 0, 7 ) !== "http://" ) {
+            var site_base = exports.Services.Config.get( 'Site', 'Base' );
+
+            if( redirect.substr( 0, 1 ) !== "/" )
+                redirect = '/'+redirect;
+
+            redirect = site_base+redirect;
+        }
+
+
         var response = namespace.RequestState.getResponse();
         response.writeHead(301, {'Location': redirect } );
         response.end();

@@ -7,7 +7,8 @@ exports.getContent = function ( data ) {
         '<a href="login/doLogOut" onclick="return confirm(\'Вы действительно хотитие выйти?\')">Выйти</a>';
     } else {
         content += 'Зравствуйте, Гость! Вы еще не авторизованы. '+
-        '<a href="login">Авторизоваться</a>'+
+        '<a href="login">Авторизоваться</a>' +
+        ' | '+
         '<a href="signin">Зарегистрироваться</a>';
     }
     content += '</div>'+

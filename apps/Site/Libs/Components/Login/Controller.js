@@ -5,6 +5,8 @@ exports.ShowLoginPage = function ( ActionParams, ViewParams, Model, RequestState
 exports.DoLogIn = function ( ActionParams, ViewParams, Model, RequestState, callback ) {
     var RequestData = RequestState.getRequestData();
 
+    console.log( RequestData.getVar( 'Nick', '' ), RequestData.getVar( 'Password', '' ) );
+
     Model.lookUpForUser( RequestData.getVar( 'Nick', '' ), RequestData.getVar( 'Password', '' ), function ( User ) {
         if( User === null ) {
             ViewParams.set( 'error', 'Пользователь с таким именем и паролем не найден' );
