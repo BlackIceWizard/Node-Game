@@ -35,7 +35,9 @@ function ConnectionConstructor() {
 
     var jSocketReady = function () {
         //console.log("Socket ready");
-        mySocket.connect( "bomberman.servegame.com", 8430 );
+
+        var host_parts = window.location.host.split( ':' );
+        mySocket.connect( host_parts[0], 8430 );
         //mySocket.connect( "192.168.1.2", 8430 );
     };
 
