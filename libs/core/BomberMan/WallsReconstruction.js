@@ -1,10 +1,10 @@
-var privats = {};
+var internal = {};
 
 exports.getInstance = function () {
-    return new privats.WallsReconstruction();
+    return new internal.WallsReconstruction();
 };
 
-privats.WallsReconstruction = function() {
+internal.WallsReconstruction = function() {
     var Game = null;
     var BomberManHooks = null;
     var CellsForReconstruction = [];

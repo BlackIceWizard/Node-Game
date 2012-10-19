@@ -1,10 +1,10 @@
-var privats = {};
+var internal = {};
 
 exports.getInstance = function () {
-    return new privats.Player();
+    return new internal.Player();
 };
 
-privats.Player = function() {
+internal.Player = function() {
     var team = null;
     var User = null;
     var Game = null;

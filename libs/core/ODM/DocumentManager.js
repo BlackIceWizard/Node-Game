@@ -1,42 +1,42 @@
-var privats = {};
-privats.connection = null;
-privats.mapper = null;
-privats.bson = null;
-privats.entityProxies = {};
+var internal = {};
+internal.connection = null;
+internal.mapper = null;
+internal.bson = null;
+internal.entityProxies = {};
 
 exports.construct = function ( callback ) {
     var ModuleProvider = exports.Services.ModuleProvider;
 
-    privats.mapper = ModuleProvider.getModule( 'Core/ODM/Mapper' );
-    privats.bson = ModuleProvider.getModule( 'MongoDB/Driver/bson/bson' );
-    privats.entityProxies = ModuleProvider.getModule( 'Core/ODM/EntityProxiesGenerator' ).generateProxies();
+    internal.mapper = ModuleProvider.getModule( 'Core/ODM/Mapper' );
+    internal.bson = ModuleProvider.getModule( 'MongoDB/Driver/bson/bson' );
+    internal.entityProxies = ModuleProvider.getModule( 'Core/ODM/EntityProxiesGenerator' ).generateProxies();
     
     var DBConnector = ModuleProvider.getModule( 'Core/ODM/DBConnector' );
 
     DBConnector.construct( function ( DBConnector ) {
         DBConnector.getConnection( function ( err, connection ) {
-            privats.connection = connection;
+            internal.connection = connection;
             callback( exports );
         });
     });
 };
 
 exports.getConnection = function() {
-    return privats.connection;
+    return internal.connection;
 };
 
 exports.newEntity = function ( collectionName ) {
-    return new privats.entityProxies[collectionName];
+    return new internal.entityProxies[collectionName];
 }
 
 exports.find = function( collectionName, id, callback ) {
     if( typeof id != "object" )
         var id = exports.toObjectID( id );
-    privats.findOne( collectionName, { '_id' : id }, callback );
+    internal.findOne( collectionName, { '_id' : id }, callback );
 };
 
 exports.findOneBy = function( collectionName, selector, callback ) {
-    privats.findOne( collectionName, selector, callback );
+    internal.findOne( collectionName, selector, callback );
 };
 
 exports.findBy = function( collectionName, selector, skip, limit, sortParams, callback ) {
@@ -50,11 +50,11 @@ exports.findBy = function( collectionName, selector, skip, limit, sortParams, ca
 
     var docs = [];
 
-    privats.connection.collection( collectionName, function ( error, collection ) {
+    internal.connection.collection( collectionName, function ( error, collection ) {
         collection.find( selector, options, function ( err, cursor ) {
             cursor.each( function(err, document) {
                 if (document != null) {
-                  docs.push( privats.mapper.map( collectionName, document ) );
+                  docs.push( internal.mapper.map( collectionName, document ) );
                 } else {
                   callback( docs );
                 }
@@ -65,9 +65,9 @@ exports.findBy = function( collectionName, selector, skip, limit, sortParams, ca
 
 exports.save = function( entity, callback ) {
     var collectionName = entity.getCollectionName();
-    var doc = privats.mapper.mapReverse( entity );
+    var doc = internal.mapper.mapReverse( entity );
 
-    privats.connection.collection( collectionName, function ( error, collection ) {
+    internal.connection.collection( collectionName, function ( error, collection ) {
         if( error )
             throw new Error('Database Error: Cann`t select collection "' + collectionName + '" with error: "' + error + '"');
 
@@ -89,31 +89,31 @@ exports.save = function( entity, callback ) {
 exports.remove = function ( entity, callback ) {
     var collectionName = entity.getCollectionName();
 
-    privats.connection.collection( collectionName, function ( error, collection ) {
+    internal.connection.collection( collectionName, function ( error, collection ) {
         collection.remove( { '_id' : entity.getId() }, callback );
     });
 }
 
 exports.toJSON = function( entity ) {
-    return privats.mapper.mapReverse( entity );
+    return internal.mapper.mapReverse( entity );
 };
 
 
 exports.toObjectID = function ( str ) {
-    return new privats.bson.ObjectID( str );
+    return new internal.bson.ObjectID( str );
 };
 
 exports.bind = function ( Entity, data ) {
-    privats.mapper.mapToEntity( Entity, data );
+    internal.mapper.mapToEntity( Entity, data );
 };
 
-privats.findOne = function ( collectionName, params, callback ) {
-    privats.connection.collection( collectionName, function ( error, collection ) {
+internal.findOne = function ( collectionName, params, callback ) {
+    internal.connection.collection( collectionName, function ( error, collection ) {
         collection.findOne( params, function ( err, document ) {
             if( !document )
                 callback( null );
             else {
-                callback( privats.mapper.map( collectionName, document ) );
+                callback( internal.mapper.map( collectionName, document ) );
             }
         });
     });

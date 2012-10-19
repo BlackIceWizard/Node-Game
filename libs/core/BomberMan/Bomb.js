@@ -1,10 +1,10 @@
-var privats = {};
+var internal = {};
 
 exports.getInstance = function () {
-    return new privats.Bomb();
+    return new internal.Bomb();
 };
 
-privats.Bomb = function() {
+internal.Bomb = function() {
     var Player = null;
     var Position = null;
     var BomberManHooks = null;

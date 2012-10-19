@@ -1,4 +1,4 @@
-var privats = {};
+var internal = {};
 
 exports.map = function ( collectionName, doc ) {
     var Entity = exports.Services.DocumentManager.newEntity( collectionName );
@@ -14,7 +14,7 @@ exports.mapToEntity = function ( Entity, doc ) {
         if( typeof doc[ propertyName ] == 'undefined' )
             continue;
 
-        Entity['set'+privats.ucfirst( propertyName )]( doc[propertyName] );
+        Entity['set'+internal.ucfirst( propertyName )]( doc[propertyName] );
     }
     return Entity;
 }
@@ -29,12 +29,12 @@ exports.mapReverse = function ( Entity ) {
         doc._id = Entity.getId();
 
     for( var propertyName in EntityDefinition.entityDefinition )
-        doc[propertyName] = Entity['get'+privats.ucfirst( propertyName )]();
+        doc[propertyName] = Entity['get'+internal.ucfirst( propertyName )]();
 
     return doc;
 }
 
-privats.ucfirst = function (str) {
+internal.ucfirst = function (str) {
     var f = str.charAt(0).toUpperCase();
     return f + str.substr(1);
 }

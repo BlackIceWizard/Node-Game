@@ -1,11 +1,11 @@
-var privats = {
+var internal = {
     "gamersList" : {},
     'connectionList' : {}
 };
 
 exports.getParticipantNickList = function () {
     var nicks = [];
-    for( var i in privats.gamersList )
+    for( var i in internal.gamersList )
         nicks.push( i );
 
     return nicks;
@@ -13,25 +13,25 @@ exports.getParticipantNickList = function () {
 
 exports.assignNewParticipant = function ( UserId, callback ) {
     exports.Services.DocumentManager.find( 'Users', UserId, function ( User ) {
-        privats.gamersList[User.getNick()] = { 'User' : User };
+        internal.gamersList[User.getNick()] = { 'User' : User };
         callback();
     });
 };
 
 exports.removeParticipant = function ( UserId ) {
-    for( var i in privats.gamersList ) {
-        if( privats.gamersList[i].User.getId() == UserId ) {
-            delete privats.gamersList[i];
+    for( var i in internal.gamersList ) {
+        if( internal.gamersList[i].User.getId() == UserId ) {
+            delete internal.gamersList[i];
             break;
         }
     }
 };
 
 exports.getParticipantByUserId = function ( UserId ) {
-    for( var i in privats.gamersList ) {
-        if( privats.gamersList[i].User.getId().toString() == UserId.toString() ) {
-            //console.log( privats.participantsList[i].User.getId(), UserId );
-            return privats.gamersList[i].User;
+    for( var i in internal.gamersList ) {
+        if( internal.gamersList[i].User.getId().toString() == UserId.toString() ) {
+            //console.log( internal.participantsList[i].User.getId(), UserId );
+            return internal.gamersList[i].User;
         }
     }
     return null;
@@ -40,33 +40,33 @@ exports.getParticipantByUserId = function ( UserId ) {
 
 exports.appendNewConnection = function ( ConnectionState ) {
     /*console.log( '--------- Before ---------' );
-    for( var i = 0; i < privats.connectionList.length; i++ ) {
-        var participant = privats.connectionList[i].getParticipant();
-        console.log( i, participant ? participant.getNick() : participant, privats.connectionList[i].getConnectionNumber() );
+    for( var i = 0; i < internal.connectionList.length; i++ ) {
+        var participant = internal.connectionList[i].getParticipant();
+        console.log( i, participant ? participant.getNick() : participant, internal.connectionList[i].getConnectionNumber() );
     }*/
-    var number = privats.generateConnectionNumber();
-    privats.connectionList[number] = ConnectionState;
+    var number = internal.generateConnectionNumber();
+    internal.connectionList[number] = ConnectionState;
     ConnectionState.setConnectionNumber( number );
     /*console.log( '--------- After ---------' );
-    for( var i = 0; i < privats.connectionList.length; i++ ) {
-        var participant = privats.connectionList[i].getParticipant();
-        console.log( i, participant ? participant.getNick() : participant, privats.connectionList[i].getConnectionNumber() );
+    for( var i = 0; i < internal.connectionList.length; i++ ) {
+        var participant = internal.connectionList[i].getParticipant();
+        console.log( i, participant ? participant.getNick() : participant, internal.connectionList[i].getConnectionNumber() );
     }
     console.log( '-------------------------' );*/
 };
 
 exports.removeConnection = function ( ConnectionState ) {
-    delete privats.connectionList[ConnectionState.getConnectionNumber()];
+    delete internal.connectionList[ConnectionState.getConnectionNumber()];
 };
 
 exports.getConnections = function () {
-    return privats.connectionList;
+    return internal.connectionList;
 };
 
-privats.generateConnectionNumber = function () {
+internal.generateConnectionNumber = function () {
     do {
         var number = Math.random();
-    } while( typeof privats.connectionList[ number ] !== 'undefined' );
+    } while( typeof internal.connectionList[ number ] !== 'undefined' );
 
     return number;
 };

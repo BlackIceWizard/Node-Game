@@ -1,33 +1,39 @@
-var privats = {};
+/**
+ * @type Config
+ * */
+var internal = {};
 
 exports.construct = function () {
-    privats.router = exports.Services.ModuleProvider.getModule( 'Core/MVC/Router' );
+    internal.router = exports.Services.ModuleProvider.getModule( 'Core/MVC/Router' );
+    internal.MP = exports.Services.ModuleProvider;
 };
 
 exports.dispatch = function ( request, response, sessionid ) {
 
-    var MP = exports.Services.ModuleProvider;
 
-    var route = privats.router.getRoute( request );
 
-    var Controller = MP.getModule( 'Site/Components/'+route.Component+'/Controller' );
-    var Model      = MP.getModule( 'Site/Components/'+route.Component+'/Model' );
-    var View       = MP.getModule( 'Site/Components/'+route.Component+'/View' );
+    var route = internal.router.getRoute( request );
 
-    var RequestState = MP.getModule( 'Core/MVC/RequestState' ).getInstance();
+    var Controller = internal.MP.getModule( 'Site/Components/'+route.Component+'/Controller' );
+    var Model      = internal.MP.getModule( 'Site/Components/'+route.Component+'/Model' );
+    var View       = internal.MP.getModule( 'Site/Components/'+route.Component+'/View' );
+
+    var RequestState = internal.MP.getModule( 'Core/MVC/RequestState' ).getInstance();
     RequestState.setRequest( request );
     RequestState.setResponse( response );
     RequestState.setSession( sessionid );
 
     var namespace = { 'route' : route, "Controller" : Controller, 'Model' : Model, 'View' : View, 'RequestState' : RequestState };
 
-    privats.grabbingRequestData ( namespace );
+    internal.grabbingRequestData ( namespace );
 };
 
-privats.grabbingRequestData = function ( namespace ) {
+internal.grabbingRequestData = function ( namespace ) {
 
     var request = namespace.RequestState.getRequest();
-    var RequestProcessor = exports.Services.RequestProcessor.getInstance( request.headers['content-type'] );
+
+    var RequestProcessor = internal.MP.getModuleInstance( 'Core/RequestProcessor' );
+    RequestProcessor.initialize( request.headers['content-type'] );
 
     var requestStr = "";
 
@@ -35,28 +41,28 @@ privats.grabbingRequestData = function ( namespace ) {
     request.addListener("end", function () {
         RequestProcessor.parseRequestStr( requestStr );
         namespace.RequestState.setRequestData( RequestProcessor );
-        setTimeout( privats.executingController, 0, namespace );
+        setTimeout( internal.executingController, 0, namespace );
     } );
 };
 
-privats.executingController = function( namespace ) {
+internal.executingController = function( namespace ) {
     //if action is set to the null, then not need in controller
     if( namespace.route.ActionParams.action === null ) {
-        privats.postExecutingController( namespace );
+        internal.postExecutingController( namespace );
         return;
     }
 
-    var action = privats.ucfirst( namespace.route.ActionParams.action );
+    var action = internal.ucfirst( namespace.route.ActionParams.action );
 
     if( typeof namespace.Controller[action] == 'undefined'  )
         throw new Error('Dispatcher: controller "Site/Components/'+namespace.route.Component+'/Controller" does not contain function "'+action+'"');
 
     namespace.Controller[action]( namespace.route.ActionParams, namespace.route.ViewParams, namespace.Model, namespace.RequestState, function () {
-        privats.postExecutingController( namespace );
+        internal.postExecutingController( namespace );
     });
 };
 
-privats.postExecutingController = function( namespace ) {
+internal.postExecutingController = function( namespace ) {
     exports.Services.ModuleProvider.getModule( 'Core/Session/Handler' ).sendSessionCookie( namespace.RequestState.getSessionId(), namespace.RequestState.getResponse() );
 
     var redirect = namespace.RequestState.getRedirect();
@@ -76,12 +82,12 @@ privats.postExecutingController = function( namespace ) {
         response.writeHead(301, {'Location': redirect } );
         response.end();
     } else {
-        setTimeout( privats.executingView, 0, namespace );
+        setTimeout( internal.executingView, 0, namespace );
     }
 };
 
 
-privats.executingView = function ( namespace ) {
+internal.executingView = function ( namespace ) {
 
     var layout = namespace.route.ViewParams.getLayout();
 
@@ -90,26 +96,26 @@ privats.executingView = function ( namespace ) {
 
     namespace.View[layout]( namespace.route.ViewParams, namespace.RequestState, namespace.Model );
 
-    setTimeout( privats.renderingTemplate, 0, namespace );
+    setTimeout( internal.renderingTemplate, 0, namespace );
 };
 
-privats.renderingTemplate = function ( namespace ) {
+internal.renderingTemplate = function ( namespace ) {
     var response = namespace.RequestState.getResponse();
 
     var Template = exports.Services.ModuleProvider.getModule( 'Site/Templates/'+namespace.route.ViewParams.getTemplate() );
 
     Template.getContent( namespace.route.ViewParams, namespace.RequestState, function ( output ) {
         var contentType = Template.getContentType();
-        privats.executeOutput( output, response, contentType );
+        internal.executeOutput( output, response, contentType );
     });
 };
 
-privats.executeOutput = function ( output, response, contentType ) {
+internal.executeOutput = function ( output, response, contentType ) {
     response.writeHead(200, {'Content-Type': contentType});
     response.end( output );
 };
 
-privats.ucfirst = function (str) {
+internal.ucfirst = function (str) {
     var f = str.charAt(0).toUpperCase();
     return f + str.substr(1);
 };

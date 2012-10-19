@@ -1,4 +1,4 @@
-var privats = {};
+var internal = {};
 
 exports.prepareAndValidate = function ( data, errors ) {
     var String = exports.Services.ModuleProvider.getModule( 'Helpers/String' );

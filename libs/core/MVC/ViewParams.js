@@ -1,12 +1,12 @@
-var privats = {};
+var internal = {};
 
 exports.getInstance = function ( template, layoutFolder, layout ) {
-    var instance = new privats.Instance();
+    var instance = new internal.Instance();
     instance.construct( template, layoutFolder, layout );
     return instance; 
 };
 
-privats.Instance = function () {
+internal.Instance = function () {
 
     var page = {
         scriptLinks : [],

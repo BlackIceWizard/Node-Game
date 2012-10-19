@@ -1,4 +1,4 @@
-var privats = {
+var internal = {
     'projectRootDirectory' : null
 };
 
@@ -6,13 +6,13 @@ exports.testParams = {};
 
 exports.init = function ( callback ) {
     var path   = require('path');
-    privats.projectRootDirectory = path.normalize( __dirname + '/../../../../' );
+    internal.projectRootDirectory = path.normalize( __dirname + '/../../../../' );
     callback()
 };
 
 exports.testInstantiate = function( callback ) {
     //exports.assertThrow
-    privats.ModuleProvider = require( privats.projectRootDirectory + '/libs/core/ModuleProvider' ).construct( privats.projectRootDirectory );
+    internal.ModuleProvider = require( internal.projectRootDirectory + '/libs/core/ModuleProvider' ).construct( internal.projectRootDirectory );
     
     callback();
 };

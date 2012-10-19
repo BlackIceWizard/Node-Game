@@ -1,4 +1,4 @@
-var privats = {
+var internal = {
     Hooks : {},
     AreasReversed : null
 };
@@ -11,27 +11,27 @@ exports.Games = null;
 
 
 exports.registerHooks = function ( area, HookModule ) {
-    privats.Hooks[area] = HookModule;
-    privats.Hooks[area].setSocketFrame( exports );
-    privats.Hooks[area].setSocketDispatcher( exports.Services.ModuleProvider.getModule( 'Core/Socket/Dispatcher' ) );
+    internal.Hooks[area] = HookModule;
+    internal.Hooks[area].setSocketFrame( exports );
+    internal.Hooks[area].setSocketDispatcher( exports.Services.ModuleProvider.getModule( 'Core/Socket/Dispatcher' ) );
 };
 
 exports.getAreaName = function ( AreaNumber ) {
-    if( privats.AreasReversed === null ) {
-        privats.AreasReversed = {};
+    if( internal.AreasReversed === null ) {
+        internal.AreasReversed = {};
         for( var AreaName in exports.Areas ) {
-            privats.AreasReversed[exports.Areas[AreaName]] = AreaName;
+            internal.AreasReversed[exports.Areas[AreaName]] = AreaName;
         }
     }
 
-    if( typeof privats.AreasReversed[AreaNumber] != 'undefined' )
-        return privats.AreasReversed[AreaNumber];
+    if( typeof internal.AreasReversed[AreaNumber] != 'undefined' )
+        return internal.AreasReversed[AreaNumber];
     else
         return null;
 };
 
 exports.getHooks = function ( area ) {
-    return privats.Hooks[area];
+    return internal.Hooks[area];
 };
 
 

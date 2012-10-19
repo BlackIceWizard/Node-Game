@@ -1,14 +1,14 @@
-var privats = {
+var internal = {
     Games : []
 };
 
 exports.appendNewGame = function ( Game ) {
-    privats.Games.push( Game );
+    internal.Games.push( Game );
 };
 
 exports.getGame = function ( key ) {
-    if( typeof privats.Games[key] !== 'undefined' )
-        return privats.Games[key];
+    if( typeof internal.Games[key] !== 'undefined' )
+        return internal.Games[key];
     else
         return null;
 };

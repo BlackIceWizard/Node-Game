@@ -1,10 +1,10 @@
-var privats = {};
+var internal = {};
 
 exports.getInstance = function () {
-    return new privats.MessageHistory();
+    return new internal.MessageHistory();
 };
 
-privats.MessageHistory = function() {
+internal.MessageHistory = function() {
     var messages = {};
     var capacity = 200;
     var topMessageNumber = 0;

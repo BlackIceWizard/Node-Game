@@ -1,4 +1,4 @@
-var privats = {};
+var internal = {};
 
 exports.construct = function ( callback ) {
     callback( exports );
@@ -25,7 +25,7 @@ exports.manageSessionState = function ( request, response ) {
     //try {
         if( typeof request.headers.cookie != 'undefined' ) {
 
-            var cookies = privats.parseCookieHeader( request.headers.cookie );
+            var cookies = internal.parseCookieHeader( request.headers.cookie );
 
             var session_creation_time = 0;
             var newestCookieSessionId = null;
@@ -33,11 +33,11 @@ exports.manageSessionState = function ( request, response ) {
             //Parse session cookies and look for newest among theirs
             for( var i = 0; i < cookies.length; i++ ) {
                 if( cookies[i].name == 'sessionid' ) {
-                    var cookieSessionJSON = privats.decode( cookies[i].value );
+                    var cookieSessionJSON = internal.decode( cookies[i].value );
                    
                     if( cookieSessionJSON ) {
                         cookieSessionObject = JSON.parse( cookieSessionJSON );
-                        if( privats.isValidSessionCookie( cookieSessionObject ) && cookieSessionObject.t > session_creation_time ) {
+                        if( internal.isValidSessionCookie( cookieSessionObject ) && cookieSessionObject.t > session_creation_time ) {
                             newestCookieSessionId = cookieSessionObject;
                             session_creation_time = cookieSessionObject.t;
                         }
@@ -96,21 +96,21 @@ exports.sendSessionCookie = function ( sessionId, response ) {
     //var SessionCookieLifeTime = exports.Services.Config.get( "Site", "SessionCookieLifeTime" );
     var now = new Date();
     //var expires = new Date( now.getTime() + SessionCookieLifeTime );
-    var encodedSessionId = privats.encodeSessionId( now.getTime(), sessionId, session.getUserId() !== null ? 1 : 0 );
+    var encodedSessionId = internal.encodeSessionId( now.getTime(), sessionId, session.getUserId() !== null ? 1 : 0 );
 
     response.setHeader( "Set-Cookie", 'sessionid=' + encodedSessionId + '; expires=' + session.getExpireDate().toGMTString() + '; path=/;' );
 };
 
-privats.encodeSessionId =function ( t, id, r ) {
+internal.encodeSessionId =function ( t, id, r ) {
     var cookieSessionObject = { 't' : t, 'id' : id, 'r' : r };
-    return privats.encode( JSON.stringify( cookieSessionObject ) );
+    return internal.encode( JSON.stringify( cookieSessionObject ) );
 };
 
-privats.isValidSessionCookie = function ( cookieObject ) {
+internal.isValidSessionCookie = function ( cookieObject ) {
     return typeof cookieObject.t != 'undefined' && typeof cookieObject.id != 'undefined' &&  typeof cookieObject.r != 'undefined';
 };
 
-privats.parseCookieHeader = function ( cookiesString ) {
+internal.parseCookieHeader = function ( cookiesString ) {
     var StringHelper = exports.Services.ModuleProvider.getModule( 'Helpers/String' );
     var cookies = [];
     var nameValuePairs = cookiesString.split( ";" );
@@ -159,12 +159,12 @@ exports.getSessionIdList = function ( authorized_only ) {
 };
 
 exports.getDecodedSession = function ( encoded_session_id ) {
-    var SessionIdJSON = privats.decode( encoded_session_id );
+    var SessionIdJSON = internal.decode( encoded_session_id );
     var SessionIdObject = JSON.parse( SessionIdJSON );
     return SessionIdObject.id;
 };
 
-privats.encode = function ( plainText ) {
+internal.encode = function ( plainText ) {
     var crypto = require( 'crypto' );
 
     var encryption_key = exports.Services.Config.get( "Site", "SecretWord" );
@@ -177,7 +177,7 @@ privats.encode = function ( plainText ) {
     return encodedText;
 };
 
-privats.decode = function( encodedText ) {
+internal.decode = function( encodedText ) {
     var crypto = require( 'crypto' );
 
     var encryption_key = exports.Services.Config.get( "Site", "SecretWord" );

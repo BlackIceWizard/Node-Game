@@ -1,8 +1,8 @@
-var privats = {};
-privats.dm = null;
+var internal = {};
+internal.dm = null;
 
 exports.construct = function ( callback ) {
-    privats.dm = exports.Services.DocumentManager;
+    internal.dm = exports.Services.DocumentManager;
     callback( exports );
 }
 

@@ -11,11 +11,13 @@ var rootDirectory = path.normalize( __dirname + '/../..' );
 
 var ModuleProvider = require( rootDirectory + '/libs/core/ModuleProvider' ).construct( rootDirectory );
 
-var ServiceContainer = ModuleProvider.getModule( 'Core/DependencyInjection/ServiceContainer' ).construct( ModuleProvider, 'Site/Config/Services' );
+var ServiceContainer = ModuleProvider.getModule( 'Core/DependencyInjection/ServiceContainer' );
+ServiceContainer.initialize( ModuleProvider, 'Site/Config/Services' );
 
 ModuleProvider.setServiceContainer( ServiceContainer );
 
 ServiceContainer.initServices( serverUp );
+
 
 function serverUp( Services ) {
 
@@ -188,8 +190,8 @@ function serverUp( Services ) {
         });
     }
     var NetServer = net.createServer( netServerInit );
-    NetServer.listen(8430, "192.168.1.2");
-    console.log('TCP Server running at http://192.168.1.2:8430/');
+    NetServer.listen(8430, "192.168.1.3");
+    console.log('TCP Server running at http://192.168.1.3:8430/');
     var LocalNetServer = net.createServer( netServerInit );
     LocalNetServer.listen(8430, "127.0.0.1");
     console.log('TCP Server running at http://127.0.0.1:8430/');

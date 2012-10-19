@@ -1,8 +1,8 @@
-var privats = {};
+var internal = {};
 
-privats.sessions = {};
+internal.sessions = {};
 
-privats.timeoutIds = {};
+internal.timeoutIds = {};
 
 exports.newSession = function ( sessionId, isRegistered ) {
 
@@ -13,26 +13,26 @@ exports.newSession = function ( sessionId, isRegistered ) {
 
     if( isRegistered ) {
         var userId = exports.Services.DocumentManager.toObjectID( sessionId );
-        privats.sessions[sessionId] = new privats.Session( SessionLifeTime, userId );
+        internal.sessions[sessionId] = new internal.Session( SessionLifeTime, userId );
     } else
-        privats.sessions[sessionId] = new privats.Session( SessionLifeTime );
+        internal.sessions[sessionId] = new internal.Session( SessionLifeTime );
 
-    privats.timeoutIds[sessionId] = setTimeout( exports.destroySession, SessionLifeTime, sessionId );
+    internal.timeoutIds[sessionId] = setTimeout( exports.destroySession, SessionLifeTime, sessionId );
 
-    return privats.sessions[sessionId];
+    return internal.sessions[sessionId];
 };
 
 exports.report = function () {
-  console.log( privats.sessions );  
+  console.log( internal.sessions );
 };
 
 exports.isset = function ( sessionId ) {
-    return typeof privats.sessions[sessionId] != "undefined";
+    return typeof internal.sessions[sessionId] != "undefined";
 };
 
 exports.getSession = function ( sessionId ) {
-    if( typeof privats.sessions[sessionId] != "undefined" ) {
-        return privats.sessions[sessionId];
+    if( typeof internal.sessions[sessionId] != "undefined" ) {
+        return internal.sessions[sessionId];
     } else {
         return null;
     }
@@ -40,24 +40,24 @@ exports.getSession = function ( sessionId ) {
 
 exports.destroySession = function ( sessionId, force ) {
 
-    if( typeof privats.sessions[sessionId] == "undefined" )
+    if( typeof internal.sessions[sessionId] == "undefined" )
         return;
     
     if( typeof force == "undefined" )
         var force = false;
 
     var now  = new Date();
-    var expireDate = privats.sessions[sessionId].getExpireDate();
+    var expireDate = internal.sessions[sessionId].getExpireDate();
 
     var difference = now.getTime() - expireDate.getTime();
 
-    clearTimeout( privats.timeoutIds[sessionId] );
+    clearTimeout( internal.timeoutIds[sessionId] );
 
     if( force || ( difference < 1000 && difference > -1000 ) ) {
-        delete privats.sessions[sessionId];
-        delete privats.timeoutIds[sessionId];
+        delete internal.sessions[sessionId];
+        delete internal.timeoutIds[sessionId];
     } else {
-        privats.timeoutIds[sessionId] = setTimeout( exports.destroySession, difference, sessionId );
+        internal.timeoutIds[sessionId] = setTimeout( exports.destroySession, difference, sessionId );
     }
 };
 
@@ -66,8 +66,8 @@ exports.getSessionIdList = function ( authorized_only ) {
         authorized_only = false;
 
     var result = [];
-    for( var i in privats.sessions ) {
-        if( authorized_only && privats.sessions[i].getUserId() === null )
+    for( var i in internal.sessions ) {
+        if( authorized_only && internal.sessions[i].getUserId() === null )
             continue;
 
         result.push( i );
@@ -76,7 +76,7 @@ exports.getSessionIdList = function ( authorized_only ) {
     return result;
 };
 
-privats.Session = function ( sessionLiveTime, pUserId ) {
+internal.Session = function ( sessionLiveTime, pUserId ) {
     var data = {};
 
     var createdDate = new Date();

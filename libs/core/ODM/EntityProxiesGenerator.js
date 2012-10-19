@@ -1,4 +1,4 @@
-var privats = {};
+var internal = {};
 
 exports.generateProxies = function () {
     var entityDefinitionNames = exports.Services.ModuleProvider.discoverPath( 'Core/Entities' );
@@ -15,9 +15,9 @@ exports.generateProxies = function () {
         for( var propertyName in entityDefinition.entityDefinition ) {
             propertyDefiniton = entityDefinition.entityDefinition[propertyName];
 
-            propertyTemplates.push( privats.getSimplePropertyTemplate( propertyName ) );
+            propertyTemplates.push( internal.getSimplePropertyTemplate( propertyName ) );
         }
-        var entityProxyTemplate = privats.getEntityProxyTemplate( collectionName, propertyTemplates );
+        var entityProxyTemplate = internal.getEntityProxyTemplate( collectionName, propertyTemplates );
 
         eval( entityProxyTemplate );
 
@@ -27,28 +27,28 @@ exports.generateProxies = function () {
     return entityProxies;
 };
 
-privats.getSimplePropertyTemplate = function( propertyName ) {
-    return 'privats.'+propertyName+' = null;'+
-    "\n" +'this.get'+privats.ucfirst(propertyName)+' = function(){' +
-    "\n" +'    return privats.'+propertyName+';' +
+internal.getSimplePropertyTemplate = function( propertyName ) {
+    return 'internal.'+propertyName+' = null;'+
+    "\n" +'this.get'+internal.ucfirst(propertyName)+' = function(){' +
+    "\n" +'    return internal.'+propertyName+';' +
     "\n" +'};'+
-    "\n" +'this.set'+privats.ucfirst(propertyName)+' = function( value ){' +
-    "\n" +'    privats.'+propertyName+' = value;' +
+    "\n" +'this.set'+internal.ucfirst(propertyName)+' = function( value ){' +
+    "\n" +'    internal.'+propertyName+' = value;' +
     "\n" +'};';
 }
 
-privats.getEntityProxyTemplate = function( collectionName, propertyTemplates ) {
+internal.getEntityProxyTemplate = function( collectionName, propertyTemplates ) {
     var template = 'entityProxy = function() {' +
-    "\n" +'var privats = {};' +
+    "\n" +'var internal = {};' +
     "\n" +'this.getCollectionName = function(){' +
     "\n" +'    return "'+collectionName+'";' +
     "\n" +'};' +
-    "\n" +'privats._id = null;' +
+    "\n" +'internal._id = null;' +
     "\n" +'this.getId = function(){' +
-    "\n" +'    return privats._id;' +
+    "\n" +'    return internal._id;' +
     "\n" +'};' +
     "\n" +'this.setId = function( value ){' +
-    "\n" +'    privats._id = value;' +
+    "\n" +'    internal._id = value;' +
     "\n" +'};';
 
     for( var i = 0; i< propertyTemplates.length; i++ ) {
@@ -59,7 +59,7 @@ privats.getEntityProxyTemplate = function( collectionName, propertyTemplates ) {
     return template;
 }
 
-privats.ucfirst = function (str) {
+internal.ucfirst = function (str) {
     var f = str.charAt(0).toUpperCase();
     return f + str.substr(1);
 }

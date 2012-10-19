@@ -1,11 +1,11 @@
-var privats = {};
+var internal = {};
 
 exports.getQuery = function () {
-    return new privats.query( exports.Services.DocumentManager );
+    return new internal.query( exports.Services.DocumentManager );
 };
 
 
-privats.query = function ( DocumentManager ) {
+internal.query = function ( DocumentManager ) {
     this.dm = DocumentManager;
 
     this.action = null;

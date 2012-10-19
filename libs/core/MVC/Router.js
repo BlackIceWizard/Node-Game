@@ -1,4 +1,4 @@
-var privats = {};
+var internal = {};
 
 exports.getRoute = function ( request ) {
     var MP = exports.Services.ModuleProvider;
@@ -11,7 +11,7 @@ exports.getRoute = function ( request ) {
 
     for( var i = 0; i < requestMatching.length; i++ ) {
         if( typeof requestMatching[i].URLregexp == 'undefined' )
-            privats.initRequestDefinition( requestMatching[i] );
+            internal.initRequestDefinition( requestMatching[i] );
 
         for( var key in requestMatching[i].URLregexp ) {
             
@@ -36,7 +36,7 @@ exports.getRoute = function ( request ) {
                 result.ViewParams = MP.getModule( 'Core/MVC/ViewParams' ).getInstance( ViewParams.template, ViewParams.layoutFolder, ViewParams.layout );
 
                 if( requestMatching[i].segmentVars[key].length > 0 ) {
-                    var SegmentActionParameters = privats.getSegmentActionParameters( request.url, matchedRequestDefinition, key );
+                    var SegmentActionParameters = internal.getSegmentActionParameters( request.url, matchedRequestDefinition, key );
 
                     for( param_name in SegmentActionParameters )
                         result.ActionParams[param_name] = SegmentActionParameters[param_name];
@@ -63,7 +63,7 @@ exports.getRoute = function ( request ) {
     return result;
 };
 
-privats.initRequestDefinition = function ( RequestDefinition ) {
+internal.initRequestDefinition = function ( RequestDefinition ) {
     var segmentVarExp = /\{([^/]+)\}/ig;
 
     if( typeof(RequestDefinition.URL) != 'object' || !(RequestDefinition.URL instanceof Array) ) {
@@ -84,7 +84,7 @@ privats.initRequestDefinition = function ( RequestDefinition ) {
     }
 }
 
-privats.getSegmentActionParameters = function( URL, definition, key ) {
+internal.getSegmentActionParameters = function( URL, definition, key ) {
     var SegmentActionParameters = {};
 
     matches = URL.match( definition.URLregexp[key] );

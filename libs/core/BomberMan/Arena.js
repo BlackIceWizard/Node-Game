@@ -1,10 +1,10 @@
-var privats = {};
+var internal = {};
 
 exports.getInstance = function () {
-    return new privats.Arena();
+    return new internal.Arena();
 };
 
-privats.Arena = function() {
+internal.Arena = function() {
 
     var fieldDimension = [ 25, 15 ];
     var Game = null;

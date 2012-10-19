@@ -32,7 +32,7 @@ function ChatConstuctor( ) {
         this.gamersList = UserNicks;
         this.drawParticipantsList();
     };
-    
+
     this.drawParticipantsList = function () {
         var userListHTML = '<ul>';
 

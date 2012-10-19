@@ -1,10 +1,10 @@
-var privats = {};
+var internal = {};
 
 exports.getInstance = function () {
-    return new privats.ConnectionState();
+    return new internal.ConnectionState();
 };
 
-privats.ConnectionState = function() {
+internal.ConnectionState = function() {
     var Session = null;
     var isMessageQueueFree = true;
     var messageQueue = [];

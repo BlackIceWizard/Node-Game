@@ -1,4 +1,4 @@
-var privats = {};
+var internal = {};
 
 exports.getContentType = function () {
     return 'text/html; charset=UTF-8';
@@ -8,15 +8,15 @@ exports.getContent = function ( ViewParams, RequestState, callback ) {
     var Template = exports.Services.ModuleProvider.getModule( 'Site/HTML/Templates/'+ViewParams.getTemplate()+'/Template' );
     var Layout = exports.Services.ModuleProvider.getModule( 'Site/HTML/Templates/'+ViewParams.getTemplate()+'/'+ViewParams.getLayoutFolder()+'/'+ViewParams.getLayout() );
 
-    privats.renderLayout( Layout, ViewParams, RequestState, function ( layoutContent ) {
+    internal.renderLayout( Layout, ViewParams, RequestState, function ( layoutContent ) {
         ViewParams.setLayoutContent( layoutContent );
-        privats.renderLayout( Template, ViewParams, RequestState, function ( mainLayoutContent ) {
+        internal.renderLayout( Template, ViewParams, RequestState, function ( mainLayoutContent ) {
             callback( mainLayoutContent );
         });
     });
 };
 
-privats.renderLayout = function ( Layout, ViewParams, RequestState, callback ) {
+internal.renderLayout = function ( Layout, ViewParams, RequestState, callback ) {
     if( typeof Layout.widgets != 'undefined' ) {
         var widgets = Layout.widgets();
 
@@ -24,7 +24,7 @@ privats.renderLayout = function ( Layout, ViewParams, RequestState, callback ) {
         for( var i in widgets )
             renderQueue.push( i );
 
-        privats.renderWidget( renderQueue, widgets, ViewParams, RequestState, privats.renderIterator, function () {
+        internal.renderWidget( renderQueue, widgets, ViewParams, RequestState, internal.renderIterator, function () {
             var layoutContent = Layout.getContent( ViewParams );
             callback( layoutContent );
         });
@@ -35,7 +35,7 @@ privats.renderLayout = function ( Layout, ViewParams, RequestState, callback ) {
     }
 };
 
-privats.renderWidget = function ( renderQueue, widgets, ViewParams, RequestState, callback, finalCallback ) {
+internal.renderWidget = function ( renderQueue, widgets, ViewParams, RequestState, callback, finalCallback ) {
     var widgetName = renderQueue.pop();
     var widgetParams = widgets[widgetName];
 
@@ -57,10 +57,10 @@ privats.renderWidget = function ( renderQueue, widgets, ViewParams, RequestState
     }
 };
 
-privats.renderIterator = function ( renderQueue, widgets, ViewParams, RequestState, finalCallback ) {
+internal.renderIterator = function ( renderQueue, widgets, ViewParams, RequestState, finalCallback ) {
     if( renderQueue.length == 0 ) {
         finalCallback();
     } else {
-        privats.renderWidget( renderQueue, widgets, ViewParams, RequestState, privats.renderIterator, finalCallback );
+        internal.renderWidget( renderQueue, widgets, ViewParams, RequestState, internal.renderIterator, finalCallback );
     }
 };

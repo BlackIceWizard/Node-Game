@@ -1,4 +1,4 @@
-var privats = {};
+var internal = {};
 
 exports.talk = function ( message, ConnectionState, SocketFrame, startDialog, callback ) {
     if( typeof message == 'object' && typeof message.TakeMeInGame == 'object' && typeof message.TakeMeInGame.game !== "undefined" && typeof message.TakeMeInGame.team !== "undefined" ) {

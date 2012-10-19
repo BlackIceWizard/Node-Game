@@ -1,4 +1,4 @@
-var privats = {};
+var internal = {};
 
 exports.lookUpForUser = function ( nick, password, callback ) {
     var String = exports.Services.ModuleProvider.getModule( 'Helpers/String' );

@@ -1,6 +1,6 @@
-var privats = {};
+var internal = {};
 
-privats.db = null;
+internal.db = null;
 
 exports.construct = function ( callback ) {
     var mongodb = exports.Services.ModuleProvider.getModule( 'MongoDB/Driver' );
@@ -10,13 +10,13 @@ exports.construct = function ( callback ) {
     var port = exports.Services.Config.get( 'MongoDB', 'port' );
 
 
-    privats.db = new mongodb.Db(
+    internal.db = new mongodb.Db(
         database,
         new mongodb.Server( host, port, {} ),
         {}
     );
 
-    privats.db.addListener("error", function( error ) {
+    internal.db.addListener("error", function( error ) {
        throw new Error( "Can`t connecting to mongo -- perhaps it isn't running? Error: \n"+error );
     });
 
@@ -24,5 +24,5 @@ exports.construct = function ( callback ) {
 }
 
 exports.getConnection = function ( callback ) {
-    privats.db.open( callback );
+    internal.db.open( callback );
 }

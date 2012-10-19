@@ -1,4 +1,4 @@
-var privats = {};
+var internal = {};
 
 exports.dispatch = function( JSONData, ConnectionState, SocketFrame, stream ) {
 
@@ -25,7 +25,7 @@ exports.dispatch = function( JSONData, ConnectionState, SocketFrame, stream ) {
 
     var output = MP.getModule( "Site/Socket/Dialogs/"+AreaName+"/"+dialogName ).talk( message, ConnectionState, SocketFrame, false, function ( output ) {
         //console.log( ConnectionState );
-        privats.sendData( stream, data.area, dialogName, output, ConnectionState )
+        internal.sendData( stream, data.area, dialogName, output, ConnectionState )
     });
 
 };
@@ -37,11 +37,11 @@ exports.initiateDialog = function ( area, dialogName, message, ConnectionState, 
     var AreaName = SocketFrame.getAreaName( area );
 
     var output = MP.getModule( "Site/Socket/Dialogs/"+AreaName+"/"+dialogName ).talk( message, ConnectionState, SocketFrame, true, function ( output ) {
-        privats.sendData( stream, area, dialogName, output, ConnectionState )
+        internal.sendData( stream, area, dialogName, output, ConnectionState )
     });
 };
 
-privats.sendData = function ( stream, area, dialogName, output, ConnectionState ) {
+internal.sendData = function ( stream, area, dialogName, output, ConnectionState ) {
     if( output !== null ) {
 
         var messageNumber = ConnectionState.getMessageHistory().getNextMessageNumber();
@@ -54,7 +54,7 @@ privats.sendData = function ( stream, area, dialogName, output, ConnectionState 
             if( stream.writable ) {
                 console.log( 'TCP output: '+str_output );
                 stream.write( str_output, 'UTF8', function() {
-                    setTimeout( function() { privats.afterSendData( stream, ConnectionState ) }, 20 );
+                    setTimeout( function() { internal.afterSendData( stream, ConnectionState ) }, 20 );
                 });
             } else {
                 console.log( 'TCP error: stream not writable' );
@@ -66,7 +66,7 @@ privats.sendData = function ( stream, area, dialogName, output, ConnectionState 
 };
 
 
-privats.afterSendData = function ( stream, ConnectionState ) {
+internal.afterSendData = function ( stream, ConnectionState ) {
     var str_output = ConnectionState.popOutOfMessageQueue();
     if( str_output === null ) {
         ConnectionState.setFreeMessageQueue();
@@ -74,7 +74,7 @@ privats.afterSendData = function ( stream, ConnectionState ) {
         if( stream.writable ) {
             console.log( 'TCP output: '+str_output );
             stream.write( str_output, 'UTF8', function() {
-                setTimeout( function() { privats.afterSendData( stream, ConnectionState ) }, 20 );
+                setTimeout( function() { internal.afterSendData( stream, ConnectionState ) }, 20 );
             })
         } else {
             console.log( 'TCP error: stream not writable' );

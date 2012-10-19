@@ -1,4 +1,4 @@
-var privats = {};
+var internal = {};
 
 exports.talk = function ( message, ConnectionState, SocketFrame, startDialog, callback ) {
     if( startDialog ) {
