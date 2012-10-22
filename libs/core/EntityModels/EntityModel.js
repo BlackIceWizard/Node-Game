@@ -4,7 +4,7 @@ internal.dm = null;
 exports.construct = function ( callback ) {
     internal.dm = exports.Services.DocumentManager;
     callback( exports );
-}
+};
 
 exports.newEntity = function ( collection ) {
     

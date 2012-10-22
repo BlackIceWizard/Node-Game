@@ -8,7 +8,7 @@ exports.getInstance = function () {
 };
 
 /**
- @class Служит обработчиком HTTP запросов к серверу
+ * @class Служит обработчиком HTTP запросов к серверу
  */
 var RequestProcessor = function () {
 

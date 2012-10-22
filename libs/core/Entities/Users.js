@@ -1,3 +1,8 @@
+/**
+ * @fileOverview Объявление сущности User для меппинга базы данных
+ */
+
+
 exports.entityDefinition = {
     Nick : {
         nullable: false,

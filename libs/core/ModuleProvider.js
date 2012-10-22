@@ -1,5 +1,5 @@
 /**
- @class Служит провайдером модулей
+ * @class Служит провайдером модулей
  */
 var ModuleProvider = function() {
 
