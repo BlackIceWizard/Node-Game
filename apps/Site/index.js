@@ -68,7 +68,7 @@ function serverUp( Services ) {
 
     var HTTPDispatcher = Services.ModuleProvider.getModule( 'Core/MVC/Dispatcher' );
 
-    HTTPDispatcher.construct();
+    HTTPDispatcher.initialize();
 
     var SessionHandler = Services.ModuleProvider.getModule( 'Core/Session/Handler' );
 
@@ -82,9 +82,9 @@ function serverUp( Services ) {
 
         //console.log( request.headers );
 
-        var sessionId = SessionHandler.manageSessionState( request, response );
+        var session_id = SessionHandler.manageSessionState( request, response );
 
-        HTTPDispatcher.dispatch( request, response, sessionId );
+        HTTPDispatcher.dispatch( request, response, session_id );
         
     }).listen(8008, '127.0.0.2' );
 
